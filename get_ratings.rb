@@ -7,7 +7,7 @@ include RottenTomatoes
 
 MOVIES_DIR = "/Volumes/NOMAD/movies/jp/Movies"
 
-# These code snippets use an open-source library. http://unirest.io/ruby
+# http://unirest.io/ruby
 def get_meta_score(movie)
   response = Unirest.post "https://byroredux-metacritic.p.mashape.com/find/movie",
     headers:{
@@ -44,24 +44,23 @@ end
 # generate hash map of genre => [movies]
 movies = Dir[MOVIES_DIR + "/*"].inject({}) do |h,dir|
   h[dir.split("/").last] = Dir.entries(dir).inject([]) do |a,name| 
-    # TODO: some movie names are nil
-    a << name.split(".").first
-    a
+    e = name.split(".").first
+    a << e unless e == nil
+    a.sort
   end
 
   h
 end
 
+puts "title: | Metascore | RottenTomatoes critics score | RottenTomatoes audience score"
+
 movies.each do |genre,movie_list|
   puts "\n\n#{genre}\n\n"
   
   movie_list.each do |movie| 
-    
-    unless movie == nil
-      rt = get_rt_scores(movie)
-      puts "#{movie}: #{get_meta_score(movie)} #{rt[:critics_score]} #{rt[:audience_score]}"
-      $stdout.flush
-    end
+    rt = get_rt_scores(movie)
+    puts "#{movie}: #{get_meta_score(movie)} #{rt[:critics_score]} #{rt[:audience_score]}"
+    $stdout.flush
   end
 end
 
